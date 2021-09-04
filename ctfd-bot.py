@@ -8,15 +8,16 @@ my_headers = {
         'Accept-Encoding' : 'gzip',
         'Accept-Language' : 'zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4'
     }
-############自定义#############
-ctfd_url = 'http://ip:port'   #这里填写ctfd的地址
-username = "xxxx"             #ctfd账户
-password = "xxxx"             #ctfd密码
-############自定义#############
+############自定义参数#############
+ctfd_url = 'http://ip:port'       #这里填写ctfd的地址
+username = "xxxx"                 #ctfd账户
+password = "xxxx"                 #ctfd密码
+qq_group = "xxxxxxx"              #ctfd密码
+############自定义参数#############
 login_url = ctfd_url + '/login'
 apiusers = ctfd_url + '/api/v1/users'
 apisubs = ctfd_url + '/api/v1/submissions'
-group_api = "http://127.0.0.1:5700/send_group_msg?group_id=xxx&message="#xxx为qq群号
+group_api = "http://127.0.0.1:5700/send_group_msg?group_id="+ qq_group +"xxx&message="
 #这个地址是go-cqhttp默认的
 
 sss = requests.Session()
