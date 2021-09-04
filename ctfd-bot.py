@@ -12,7 +12,7 @@ my_headers = {
 ctfd_url = 'http://ip:port'       #这里填写ctfd的地址
 username = "xxxx"                 #ctfd账户
 password = "xxxx"                 #ctfd密码
-qq_group = "xxxxxxx"              #ctfd密码
+qq_group = "xxxxxxx"              #qq群号
 ############自定义参数#############
 login_url = ctfd_url + '/login'
 apiusers = ctfd_url + '/api/v1/users'
