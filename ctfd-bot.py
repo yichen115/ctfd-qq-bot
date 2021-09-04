@@ -8,11 +8,14 @@ my_headers = {
         'Accept-Encoding' : 'gzip',
         'Accept-Language' : 'zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4'
     }
-
-login_url = 'http://ip:port/login' #ctfd地址
-username = "xxxx" #ctfd管理员账户
-password = "xxxx"#ctfd管理员密码
-apiUrl = 'http://ip:port/api/v1/users' #ctfd地址
+############自定义#############
+ctfd_url = 'http://ip:port'   #这里填写ctfd的地址
+username = "xxxx"             #ctfd账户
+password = "xxxx"             #ctfd密码
+############自定义#############
+login_url = ctfd_url + '/login'
+apiusers = ctfd_url + '/api/v1/users'
+apisubs = ctfd_url + '/api/v1/submissions'
 group_api = "http://127.0.0.1:5700/send_group_msg?group_id=xxx&message="#xxx为qq群号
 #这个地址是go-cqhttp默认的
 
@@ -44,7 +47,7 @@ else:
 
 #获取用户列表
 def get_user_list():
-    apiUrl = 'http://ip:port/api/v1/users' #ctfd地址
+    apiUrl = apiusers
     try:
         responseJson = sss.get(apiUrl, headers = my_headers)
     except:
@@ -59,7 +62,7 @@ def get_user_list():
 
 #获取提交flag信息
 def get_attempt_info():
-    apiUrl = 'http://ip:port/api/v1/submissions' #ctfd地址
+    apiUrl = apisubs #ctfd地址
     try:
         responseJson = sss.get(apiUrl, headers = my_headers)
     except:
