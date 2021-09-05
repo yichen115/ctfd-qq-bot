@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-  
 from bs4 import BeautifulSoup
-import re,json,time,configparser,logging,sys,os,requests,asyncio
+import re,json,time,configparser,sys,os,requests,asyncio
 
 my_headers = {
         'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36',
@@ -10,15 +10,18 @@ my_headers = {
     }
 ############自定义参数#############
 ctfd_url = 'http://ip:port'       #这里填写ctfd的地址
-username = "xxxx"                 #ctfd账户
-password = "xxxx"                 #ctfd密码
+username = "xxxxx"                #ctfd账户
+password = "xxxxxx"               #ctfd密码
 qq_group = "xxxxxxx"              #qq群号
 ############自定义参数#############
+userpage=1
+subspage=1
 login_url = ctfd_url + '/login'
-apiusers = ctfd_url + '/api/v1/users'
-apisubs = ctfd_url + '/api/v1/submissions'
-group_api = "http://127.0.0.1:5700/send_group_msg?group_id="+ qq_group +"xxx&message="
+apiusers = ctfd_url + '/api/v1/users?page='
+apisubs = ctfd_url + '/api/v1/submissions?page='
+group_api = "http://127.0.0.1:5700/send_group_msg?group_id="+ qq_group +"&message="
 #这个地址是go-cqhttp默认的
+
 
 sss = requests.Session()
 r = sss.get(login_url, headers = my_headers)
@@ -48,7 +51,8 @@ else:
 
 #获取用户列表
 def get_user_list():
-    apiUrl = apiusers
+    global userpage
+    apiUrl = apiusers + str(userpage)
     try:
         responseJson = sss.get(apiUrl, headers = my_headers)
     except:
@@ -59,11 +63,13 @@ def get_user_list():
         print("error to get userlist")
         return []
     userList = eval(str(jsonInfo['data']))
+    userpage = jsonInfo['meta']['pagination']['pages']
     return userList
 
 #获取提交flag信息
 def get_attempt_info():
-    apiUrl = apisubs #ctfd地址
+    global subspage
+    apiUrl = apisubs + str(subspage)
     try:
         responseJson = sss.get(apiUrl, headers = my_headers)
     except:
@@ -74,6 +80,7 @@ def get_attempt_info():
         print("error to get attemptlist")
         return []
     allList = eval(str(jsonInfo['data']))
+    subspage = jsonInfo['meta']['pagination']['pages']
     return allList
 
 #异步循环发送请求
@@ -83,14 +90,19 @@ async def deal_user_list():
         try:
             tmpList = get_user_list()
             tmpLen = len(tmpList)
-            print(userLen,tmpLen)
             if tmpLen == 0:
                 await asyncio.sleep(3)
                 continue
+            if userLen !=1 and tmpLen == 1:
+                message = "新用户"+tmpList[0]['name']+"成功注册~"
+                #print(message)
+                requests.get(group_api+message)
+                userLen = tmpLen
+                userList = tmpList
             if userLen < tmpLen:
                 for i in range(userLen,tmpLen):
                     message = "新用户"+tmpList[i]['name']+"成功注册~"
-                    print(message)
+                    #print(message)
                     requests.get(group_api+message)
                 userLen = tmpLen
                 userList = tmpList
@@ -112,6 +124,20 @@ async def deal_attemp_list():
             if tmpallLen == 0:
                 await asyncio.sleep(3)
                 continue
+            if tmpallLen == 1 and allLen != 1:
+                if tmpallList[0]['type'] == "correct":
+                    chaname = ""
+                    for s in userList:
+                        if str(s['id']) == str(tmpallList[0]['user_id']):
+                            chaname = s['name']
+                            if chaname == "":
+                                continue
+                                await asyncio.sleep(3)
+                    message = "恭喜" + chaname + "做出" + str(tmpallList[0]['challenge']['category'])+"题目：" + str(tmpallList[0]['challenge']['name'])
+                    #print(message)
+                    requests.get(group_api+message)
+                allLen = tmpallLen
+                allList = tmpallList
             if allLen < tmpallLen:
                 for i in range(allLen,tmpallLen):
                     if tmpallList[i]['type'] == "correct":
@@ -123,7 +149,7 @@ async def deal_attemp_list():
                                     continue
                                     await asyncio.sleep(3)
                         message = "恭喜" + chaname + "做出" + str(tmpallList[i]['challenge']['category'])+"题目：" + str(tmpallList[i]['challenge']['name'])
-                        print(message)
+                        #print(message)
                         requests.get(group_api+message)
                 allLen = tmpallLen
                 allList = tmpallList
@@ -136,7 +162,6 @@ async def deal_attemp_list():
             continue         
 
 if __name__ == ("__main__"):
-    logging.basicConfig(filename='err.log',level=logging.ERROR,format='%(asctime)s %(filename)s[line:%(lineno)d] %(message)s',datefmt='%Y-%m-%d')
     userList = get_user_list()
     #userLen = 0
     userLen = len(userList)
