@@ -1,3 +1,7 @@
+# update
+https://www.yuque.com/hxfqg9/misc/ctfd#gzNMJ
+直接在源码中添加机器人接口，更加稳定一点
+
 # ctfd-qq-bot
 脚本改自：https://github.com/forever404/CTFd-Bot
 
